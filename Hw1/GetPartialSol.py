@@ -1,5 +1,12 @@
 def GetPartialSol(matrixA, SizeN, Vectorb):
     """
+        Solves the system using Gaussian Elimination with Partial Pivoting.
+        :param matrixA: The coefficient matrix
+        :param SizeN: The size of the matrix
+        :param Vectorb: The result vector
+        :return: list - The solution vector x, or None if singular
+        """
+    """
     1. find max{a[i][j]} in row i
     2. swap rows.
     3. do the same as SimpleCalculateMatrix but only one itteration and then do again from one until we finish

@@ -1,50 +1,43 @@
-def SimpleCalculateMatrix(matrixA, SizeN, Vectorb):
+import numpy as np
+def multiply_matrix_vector(matrix, vector):
     """
-     just simple gaos solution
-     get upper traingle and then calculate with the solution we get
+        Multiplies a matrix by a vector.
+        :param matrix: The matrix (list of lists)
+        :param vector: The vector (list)
+        :return: list - The result vector
+        """
     """
+    result = Matrix * Vector
+    """
+    n = len(vector)
+    result = []
+    for i in range(n):
+        val = 0
+        for j in range(n):
+            val += matrix[i][j] * vector[j]
+        result.append(val)
+    return result
 
-    # copy matrix and vector
-    matrix = [list(map(float, row)) for row in matrixA]
-    vector = list(map(float, Vectorb))
 
-    temp = [0.0] * SizeN  # solution will be here
-
-    # forward part - upper triangle
-    for i in range(SizeN):
-
-        # if the pivot is 0 we need to change the line so we can continue
-        if abs(matrix[i][i]) == 0:
-            found_swap = False
-            for k in range(i + 1, SizeN):
-                #find pyvot that isnt zero and exchange between the lines
-                if abs(matrix[k][i]) != 0:
-                    matrix[i], matrix[k] = matrix[k], matrix[i]
-                    vector[i], vector[k] = vector[k], vector[i]
-                    found_swap = True
-                    break
-
-        # Forward Propagation
-        for k in range(i + 1, SizeN):
-            pivot =  matrix[i][i]
-            l = matrix[k][i] / pivot
-
-            # update matrix
-            for j in range(i, SizeN):
-                matrix[k][j] -= l * matrix[i][j]
-
-            # update vector
-            vector[k] -= l * vector[i]
-
-    # backward propagation
-    #do the same as goes and just do all the equations without updateing the matrix
-    # last line
-    temp[SizeN - 1] = vector[SizeN - 1] / matrix[SizeN - 1][SizeN - 1]
-    # 2.the rest
-    for i in range(SizeN - 2, -1, -1):
-        sum1 = 0
-        for j in range(i + 1, SizeN):
-            sum1 += matrix[i][j] * temp[j]
-
-        temp[i] = (vector[i] - sum1) / matrix[i][i]
-    return temp
+def simplecalculatematrix(matrixA, SizeN, Vectorb):
+    """
+        :param matrixA: The coefficient matrix
+        :param SizeN: The size of the matrix
+        :param Vectorb: The result vector
+        :return: list - The solution vector x
+        """
+    """
+    Calculation: x = A^(-1) * b
+    Method:
+    1. Calculate A^(-1) using NumPy
+    2. Multiply A^(-1) * b.
+    """
+    try:
+        a_arr = np.array(matrixA)
+        np_inverse = np.linalg.inv(a_arr)
+        inverse = np_inverse.tolist()
+        result_x = multiply_matrix_vector(inverse, Vectorb)
+        return result_x
+    except np.linalg.LinAlgError:
+        print("Error: doesnt have single solution.")
+        return None

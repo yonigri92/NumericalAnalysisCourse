@@ -1,14 +1,30 @@
 from GetPartialSol import GetPartialSol
-from SimpleCalculateMatrix import SimpleCalculateMatrix
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+from simplecalculatematrix import simplecalculatematrix
+from helpfuncions import get_determinant
+from SimpleCalculateMatrixWithGous import SimpleCalculateMatrixWithGous
 def main(matrix_a, size_n, vector_b):
+    """
+
+    :param matrix_a is a matrix:
+    :param size_n size of the matrix:
+    :param vector_b vector B from the formula Ax = b:
+    :return void - prints the solution:
+    """
     if is_single_sol(matrix_a):
-        simple_answer = SimpleCalculateMatrix(matrix_a, size_n, vector_b)
+        simple_answer = simplecalculatematrix(matrix_a, size_n, vector_b)
+        # since I wrote the function that can calculate using gauss im adding the function
+        # here in a comment just remove it if you want to use gauss matrix calculation
+        # if you do please add # before simplecalculatematrix so that matrix wont get calculated twice
+        #simple_answer = SimpleCalculateMatrixWithGous(matrix_a, size_n, vector_b)
         partial_sol = GetPartialSol(matrix_a, size_n, vector_b)
         print(get_closeness_vector(simple_answer, partial_sol))
+    else:
+        print('No solution found')
 def is_single_sol(matrix_a):
+    """
+        :param matrix_a: The matrix to check
+        :return: boolean - True if determinant is non-zero, False otherwise
+        """
     """
     checks if the matrix has single solution
     """
@@ -19,95 +35,102 @@ def is_single_sol(matrix_a):
     if abs(determinate) > 1e-10:
         return True
     return False
-# will return the minor basicly a smaller matrix without  0 line  and j column
-def get_minor(matrix, j):
-    return [row[:j] + row[j+1:] for row in (matrix[:0] + matrix[0+1:])]
+# will return the minor basically a smaller matrix without  0 line  and j column
 
 
-def get_determinant(matrix_a):
-    """
-    calculate the determinant in a recursive way
-    """
-    size_n = len(matrix_a)
-    # if matrix is sizeN == 1 then matrix size is 1 on 1
-    if size_n == 1:
-        return matrix_a[0][0]
-    det = 0
-    # go over all the first row
-    for i in range(size_n):
-         # change the mark so that even times will be + and uneven -
-        sign = (-1) ** i
-        current = matrix_a[0][i]
-         #get the minor
-        inner_matrix = get_minor(matrix_a, i)
-        inner_det = get_determinant(inner_matrix)
-        det += sign * current * inner_det
-
-    return det
 
 def get_closeness_vector(simple_answer, partial_sol):
-    if not simple_answer  or not partial_sol:
-        print("error empty vector")
-        exit(1)
-    error_vector = []
-    #calculate the error vector before printing:
+    """
+        Calculates the relative error between two solution vectors.
+        :param simple_answer: The exact solution vector
+        :param partial_sol: The approximate solution vector
+        :return: string - The error vector formatted as a string in percentages
+        """
+    if not simple_answer or not partial_sol:
+        return "Error: Empty vector result"
+
     if len(simple_answer) != len(partial_sol):
-        print("vector size mismatch")
-        exit(1)
-    i=0
-    for simpleElement,partialElement in zip(simple_answer, partial_sol):
+        return "Error: Vector size mismatch"
+
+    error_vector = []
+    for simpleElement, partialElement in zip(simple_answer, partial_sol):
         if simpleElement == 0:
-            error_vector.append(0)  # protect from zero devision
+            error_vector.append(0.0)
         else:
-            error_vector.append(abs((simpleElement - partialElement)/simpleElement))
-    return str(error_vector)
+            err = abs((simpleElement - partialElement) / simpleElement) * 100
+            error_vector.append(err)
+
+    return f"Error Vector (in %): {error_vector}"
 
 
 if __name__ == '__main__':
-    print("=== simple solution  ===")
+    print("Press 1 to use predetermined input, press 2 to enter your input  ")
+    switch = input()
+    if switch == '1':
+        print("simple solution  ")
 
-    # solve able solution  [1, 1, 1, 1]
-    matrix_solvable = [
-        [4, 1, 1, 1],
-        [1, 4, 1, 1],
-        [1, 1, 4, 1],
-        [1, 1, 1, 4]
-    ]
-    vector_solvable = [7, 7, 7, 7]
-    size_n = 4
+        # solve able solution  [1, 1, 1, 1]
+        matrix = [
+            [4, 1, 1, 1],
+            [1, 4, 1, 1],
+            [1, 1, 4, 1],
+            [1, 1, 1, 4]
+        ]
+        vector = [7, 7, 7, 7]
+        size_n = 4
 
-    print(f"Matrix A: {matrix_solvable}")
-    print(f"Vector b: {vector_solvable}")
-    main(matrix_solvable, size_n, vector_solvable)
+        print(f"Matrix A: {matrix}")
+        print(f"Vector b: {vector}")
+        main(matrix, size_n, vector)
 
-    print("\n" + "=" * 50 + "\n")
+        print(" ==========================================================  ")
+        print("single solution more complex matrix where we can see the PP algorithem effects")
 
-    print("=== single solution more complex matrix where we can see the PP algorithem effects ===")
-
-    matrix_singular1 = [
-        [0, 2, 0, 1],
-        [2, 2, 3, 2],
-        [4, -3, 0, 1],
-        [6, 1, -6, -5]
-    ]
-    vector_solvable1 = [0, -2, -7, 6]
-
-
-    print(f"Matrix A: {matrix_singular1}")
-    print(f"Vector b: {vector_solvable1}")
-    main(matrix_singular1, size_n, vector_solvable1)
+        matrix2 = [
+            [0, 2, 0, 1],
+            [2, 2, 3, 2],
+            [4, -3, 0, 1],
+            [6, 1, -6, -5]
+        ]
+        vector2 = [0, -2, -7, 6]
 
 
-    print("=== Not single solution  ===")
-    # det = 0 second line is double the first one
-    matrix_singular = [
-        [1, 2, 3, 4],
-        [2, 4, 6, 8],
-        [5, 6, 7, 8],
-        [9, 10, 11, 12]
-    ]
-    vector_singular = [10, 20, 30, 40]
+        print(f"Matrix A: {matrix2}")
+        print(f"Vector b: {vector2}")
+        main(matrix2, size_n, vector2)
 
-    print(f"Matrix A: {matrix_singular}")
-    print(f"Vector b: {vector_singular}")
-    main(matrix_singular, size_n, vector_singular)
+        print(" ==========================================================  ")
+        print("Not single solution")
+        # det = 0 second line is double the first one
+        matrix2 = [
+            [1, 2, 3, 4],
+            [2, 4, 6, 8],
+            [5, 6, 7, 8],
+            [9, 10, 11, 12]
+        ]
+        vector2 = [10, 20, 30, 40]
+
+        print(f"Matrix A: {matrix2}")
+        print(f"Vector b: {vector2}")
+        main(matrix2, size_n, vector2)
+    if switch == '2':
+        print("Please enter the size of your matrix - only one number as it is squared")
+        size_n = input()
+        if int(size_n) <= 0:
+            print("Error: size of matrix must be > 0")
+            exit(1)
+        matrix = []
+        vector = []
+        print("Please enter your matrix ")
+        for i in range(int(size_n)):
+            row = []
+            for j in range(int(size_n)):
+                print(f"Enter element row {i}, col {j}:")
+                val = float(input())
+                row.append(val)
+            matrix.append(row)
+        print("Please enter your vector ")
+        for i in range(int(size_n)):
+            val = float(input())
+            vector.append(val)
+        main(matrix, int(size_n), vector)
